@@ -35,22 +35,54 @@ Zod
 5. **Travail hors ligne** : Vous pouvez coder même sans internet
 
 ### Architecture :
-- **En développement** : Base de données locale PostgreSQL (`localhost:5432`)
+- **En développement** : Base de données Prisma Dev locale (`localhost:51213`)
 - **En production** : Base de données sur Render (accessible via une URL externe)
+
+---
+
+## ⚠️ Problème résolu : Bug avec `npx prisma dev`
+
+Si vous rencontrez l'erreur `Cannot read properties of undefined (reading 'prototype')` avec `npx prisma dev`, utilisez cette version corrigée :
+
+**Solution** : Ajouter ce script dans `backend/package.json` :
+```json
+"scripts": {
+  "prisma:start_db": "npx prisma dev @0.0.0-dev.202509301625"
+}
+```
+
+**Lancer la base de données** :
+```bash
+cd backend
+npm run prisma:start_db
+```
+
+Plus d'infos sur le bug : https://github.com/prisma/prisma/issues/28133
 
 ---
 
 ## 🔷 Commandes Prisma utilisées
 
+**⚠️ Important** : Toutes les commandes Prisma doivent être exécutées depuis le dossier `backend` !
+
 ```bash
+# TOUJOURS exécuter depuis le dossier backend !
+cd backend
+
 # Installer Prisma en tant que dépendance de développement
 npm install prisma --save-dev
 
 # Initialiser Prisma dans le projet
 npx prisma init
 
+# Démarrer la base de données Prisma Dev (version corrigée)
+npm run prisma:start_db
+
 # Créer/mettre à jour les tables dans la base de données à partir du schema.prisma
 npx prisma db push
+
+# Réinitialiser la DB et pusher (supprime toutes les données !)
+npx prisma db push --force-reset
 
 # Récupérer la structure de la base de données et mettre à jour schema.prisma
 npx prisma db pull
@@ -60,44 +92,48 @@ npx prisma studio
 
 # Générer le Prisma Client (pour utiliser Prisma dans le code)
 npx prisma generate
+
+# Tester la lecture des données
+node db-read.js
+
+# Peupler la base de données
+node db-populate.js
 ```
 
 ---
 
-## 🔷 Comment configurer la base de données PostgreSQL locale ?
+## 🔷 Comment configurer Prisma Dev (base de données locale) ?
 
-### Étape 1 : Installer PostgreSQL sur macOS
-
-```bash
-# Installer PostgreSQL avec Homebrew
-brew install postgresql@14
-
-# Démarrer PostgreSQL
-brew services start postgresql@14
-
-# Vérifier que PostgreSQL fonctionne
-brew services list | grep postgresql
-```
-
-### Étape 2 : Créer une base de données pour le projet
+### Étape 1 : Installer Prisma et initialiser
 
 ```bash
-# Créer une nouvelle base de données
-createdb expenses_db
-
-# Vérifier que la base est créée
-psql -l
+cd backend
+npm install prisma --save-dev
+npx prisma init
 ```
 
-### Étape 3 : Configurer le fichier `.env` dans le backend
+Cela crée :
+- `prisma/schema.prisma` - Fichier de configuration des modèles
+- `.env` - Fichier avec l'URL de la base de données
 
-Créer/modifier le fichier `backend/.env` avec l'URL de connexion :
+### Étape 2 : Ajouter le script de démarrage corrigé
 
-```env
-DATABASE_URL="postgresql://VOTRE_USERNAME@localhost:5432/expenses_db?schema=public"
+Dans `backend/package.json`, ajouter :
+
+```json
+"scripts": {
+  "prisma:start_db": "npx prisma dev @0.0.0-dev.202509301625"
+}
 ```
 
-💡 **Remplacez `VOTRE_USERNAME`** par votre nom d'utilisateur macOS (visible avec la commande `whoami`)
+### Étape 3 : Démarrer la base de données Prisma Dev
+
+```bash
+cd backend
+npm run prisma:start_db
+```
+
+Vous devriez voir : `Your _prisma dev_ server default is ready and listening on ports 51213-51215`
 
 ### Étape 4 : Vérifier la connexion
 

@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "nodemon npm start",
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "prisma:start_db": "npx prisma dev @0.0.0-dev.202509301625",
+    "build": "npm install && npx prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
