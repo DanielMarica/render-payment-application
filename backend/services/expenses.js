@@ -1,29 +1,51 @@
-const fs = require('fs');
-const fsp = require('fs/promises');
-const path = require('path');
+const { PrismaClient } = require('../generated/prisma');
 
-const expensesFilePath = path.join(__dirname, '..', 'data', 'expenses.json');
-const expensesInitFilePath = path.join(__dirname, '..', 'data', 'expenses.init.json');
+const prisma = new PrismaClient();
 
 const getAllExpenses = async () => {
-    const data = await fsp.readFile(expensesFilePath, 'utf8');
-    return JSON.parse(data);
+    const expenses = await prisma.expense.findMany({
+        orderBy: {
+            date: 'desc'
+        }
+    });
+    return expenses;
 };
 
 const addExpense = async (expense) => {
-    const expenses = await getAllExpenses();
-    // A simple ID generation
-    const newId = expenses.length > 0 ? Math.max(...expenses.map(e => parseInt(e.id) || 0)) + 1 : 1;
-    const newExpense = { ...expense, id: newId.toString() };
-    expenses.push(newExpense);
-    await fsp.writeFile(expensesFilePath, JSON.stringify(expenses, null, 2));
+    const newExpense = await prisma.expense.create({
+        data: {
+            date: new Date(expense.date),
+            description: expense.description,
+            payer: expense.payer,
+            amount: parseFloat(expense.amount)
+        }
+    });
     return newExpense;
 };
 
-const resetExpenses = () => {
-    const initData = fs.readFileSync(expensesInitFilePath, 'utf8');
-    fs.writeFileSync(expensesFilePath, initData);
-    return JSON.parse(initData);
+const resetExpenses = async () => {
+    // Supprimer toutes les expenses
+    await prisma.expense.deleteMany();
+    
+    // Réinitialiser avec les données initiales (optionnel)
+    const fs = require('fs');
+    const path = require('path');
+    const expensesInitFilePath = path.join(__dirname, '..', 'data', 'expenses.init.json');
+    const initData = JSON.parse(fs.readFileSync(expensesInitFilePath, 'utf8'));
+    
+    // Recréer les expenses initiales
+    for (const expense of initData) {
+        await prisma.expense.create({
+            data: {
+                date: new Date(expense.date),
+                description: expense.description,
+                payer: expense.payer,
+                amount: expense.amount
+            }
+        });
+    }
+    
+    return await getAllExpenses();
 };
 
 module.exports = {
