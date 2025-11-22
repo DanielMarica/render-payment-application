@@ -20,6 +20,6 @@ export interface Expense extends Identifiable {
 }
 
 export interface User {
-  id: string;
   name: string;
+  color: string;
 }

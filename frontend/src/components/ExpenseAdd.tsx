@@ -4,7 +4,7 @@ import { z } from 'zod';
 import type { ExpenseInput } from '../types/type';
 
 interface ExpenseAddProps {
-    handleAdd: (expense: ExpenseInput) => void;
+    onAdd: (expense: ExpenseInput) => void;
 }
 
 // 🔷 Schéma de validation Zod
@@ -23,7 +23,7 @@ const expenseSchema = z.object({
         .positive({ message: 'Le montant doit être positif' }),
 });
 
-const ExpenseAdd = ({ handleAdd }: ExpenseAddProps) => {
+const ExpenseAdd = ({ onAdd }: ExpenseAddProps) => {
     // 🎯 useForm avec zodResolver pour la validation Zod
     const {
         register,
@@ -43,7 +43,7 @@ const ExpenseAdd = ({ handleAdd }: ExpenseAddProps) => {
     // 📝 onSubmit : Appelée UNIQUEMENT si Zod valide avec succès
     const onSubmit = (data: ExpenseInput) => {
         console.log('✅ Validation Zod réussie ! Données:', data);
-        handleAdd(data);
+        onAdd(data);
         reset();
     };
 
