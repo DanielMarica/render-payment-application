@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int     @id @default(autoincrement())
+  name        String
+  email       String  @unique
+  bankAccount String? // optional
+
+  // Relations
+  paidExpenses         Expense[]  @relation("PayerExpenses")
+  transfersOut         Transfer[] @relation("UserTransfersSource")
+  transfersIn          Transfer[] @relation("UserTransfersTarget")
+  participatedExpenses Expense[]  @relation("ParticipantExpenses")
+}
+
+model Expense {
+  id           Int      @id @default(autoincrement())
+  description  String
+  amount       Float
+  date         DateTime @default(now())
+  
+  // Relation vers User (Celui qui paie)
+  payer        User     @relation("PayerExpenses", fields: [payerId], references: [id])
+  payerId      Int
+  
+  // Relation vers Users (Ceux qui participent - Many to Many)
+  participants User[]   @relation("ParticipantExpenses")
+}
+
+model Transfer {
+  id       Int      @id @default(autoincrement())
+  amount   Float
+  date     DateTime @default(now())
+  
+  // Source = Celui qui envoie l'argent
+  source   User     @relation("UserTransfersSource", fields: [sourceId], references: [id])
+  sourceId Int
+  
+  // Target = Celui qui reçoit l'argent
+  target   User     @relation("UserTransfersTarget", fields: [targetId], references: [id])
+  targetId Int
+}

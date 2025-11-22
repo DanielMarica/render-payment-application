@@ -1,0 +1,84 @@
+@hostname = localhost:3000
+
+### ------------------------------------------------------------------------
+### 1. USERS
+### ------------------------------------------------------------------------
+
+### GET /api/users
+### Doit retourner la liste des utilisateurs (Alice, Bob, etc.)
+GET http://{{hostname}}/api/users
+Content-Type: application/json
+
+### ------------------------------------------------------------------------
+### 2. EXPENSES (Lecture)
+### ------------------------------------------------------------------------
+
+### GET /api/expenses
+### Doit retourner les dépenses avec l'objet complet "payer" et "participants"
+GET http://{{hostname}}/api/expenses
+Content-Type: application/json
+
+### GET /api/expenses/:id
+### Détail d'une dépense spécifique (Vérifie que payer et participants sont inclus)
+GET http://{{hostname}}/api/expenses/1
+Content-Type: application/json
+
+### ------------------------------------------------------------------------
+### 3. TRANSFERS
+### ------------------------------------------------------------------------
+
+### GET /api/transfers
+### Liste des transferts avec source et target
+GET http://{{hostname}}/api/transfers
+Content-Type: application/json
+
+### POST /api/transfers
+### Créer un nouveau transfert (Alice envoie 50€ à Bob)
+POST http://{{hostname}}/api/transfers
+Content-Type: application/json
+
+{
+  "amount": 50,
+  "sourceId": 1,
+  "targetId": 2,
+  "date": "2025-11-23T10:00:00.000Z"
+}
+
+### ------------------------------------------------------------------------
+### 4. TRANSACTIONS (Combined)
+### ------------------------------------------------------------------------
+
+### GET /api/transactions
+### Doit retourner une liste MIXTE de dépenses et de transferts, triés par date.
+### Vérifie le champ "kind": "expense" ou "transfer"
+GET http://{{hostname}}/api/transactions
+Content-Type: application/json
+
+### ------------------------------------------------------------------------
+### 5. EXPENSES (Écriture & Erreurs)
+### ------------------------------------------------------------------------
+
+### POST /api/expenses
+### Créer une nouvelle dépense (Bob paie un café pour lui et Alice)
+POST http://{{hostname}}/api/expenses
+Content-Type: application/json
+
+{
+  "description": "Coffee Break",
+  "amount": 6.50,
+  "payerId": 2,
+  "participantIds": [1, 2],
+  "date": "2025-11-23T14:30:00.000Z"
+}
+
+### POST /api/expenses (Test d'Erreur)
+### Doit échouer car l'ID 99 n'existe pas (Vérifie que le serveur ne crash pas)
+POST http://{{hostname}}/api/expenses
+Content-Type: application/json
+
+{
+  "description": "Error Test",
+  "amount": 100.00,
+  "payerId": 1,
+  "participantIds": [1, 99]
+}
