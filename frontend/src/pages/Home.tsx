@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import ExpenseItem from '../components/ExpenseItem';
 import UserItem from '../components/UserItem';
-import type { Expense, User } from '../types/type';
+import type { Expense, ExpenseData, User } from '../types/type';
 import ExpenseAdd from '../components/ExpenseAdd';
 
-const API_URL = 'http://localhost:3000/api';
+const host = import.meta.env.VITE_API_URL || 'http://unknown-api-url.com';
 
 const users : User[] =[
   {
@@ -29,7 +29,7 @@ const Home = () => {
   const fetchExpenses = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/expenses`);
+      const response = await fetch(`${host}/expenses`);
       if (!response.ok) {
         throw new Error('Failed to fetch expenses');
       }
@@ -46,9 +46,9 @@ const Home = () => {
     fetchExpenses();
   }, [fetchExpenses]);
 
-  const handleAdd = async (newExpense: Omit<Expense, 'id'>) => {
+  const handleAdd = async (newExpense: ExpenseData ) => {
     try {
-      const response = await fetch(`${API_URL}/expenses`, {
+      const response = await fetch(`${host}/expenses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ const Home = () => {
 
   const handleReset = async () => {
     try {
-      const response = await fetch(`${API_URL}/expenses/reset`, {
+      const response = await fetch(`${host}/expenses/reset`, {
         method: 'POST',
       });
       if (!response.ok) {
