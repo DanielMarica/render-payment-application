@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import ExpenseItem from '../components/ExpenseItem';
 import UserItem from '../components/UserItem';
-import type { Expense, ExpenseData, User } from '../types/type';
+import type { Expense, User, ExpenseInput } from '../types/type';
 import ExpenseAdd from '../components/ExpenseAdd';
 
 const host = import.meta.env.VITE_API_URL || 'http://unknown-api-url.com';
@@ -46,7 +46,7 @@ const Home = () => {
     fetchExpenses();
   }, [fetchExpenses]);
 
-  const handleAdd = async (newExpense: ExpenseData ) => {
+  const handleAdd = async (newExpense: ExpenseInput) => {
     try {
       const response = await fetch(`${host}/expenses`, {
         method: 'POST',
