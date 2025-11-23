@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ExpenseAdd from '../components/ExpenseAdd';
-import type { ExpenseInput } from '../types/type';
+import type { ExpenseInput } from '../types/Expense';
 
 const Add = () => {
     const [error, setError] = useState<string | null>(null);

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import ExpenseItem from '../components/ExpenseItem';
 
-import type { Expense} from '../types/type';
+import type { Expense} from '../types/Expense';
 
 const List = () => {
     const [expenses, setExpenses] = useState<Expense[]>([]);
