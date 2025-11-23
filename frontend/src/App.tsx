@@ -1,4 +1,8 @@
 import { createBrowserRouter, RouterProvider } from 'react-router';
+
+import { ApolloProvider } from '@apollo/client/react';
+import client from './lib/graph-ql.client';
+
 import Layout, { loader as layoutLoader } from './pages/Layout';
 import Welcome from './pages/Welcome';
 import Transactions, { loader as transactionsLoader } from './pages/Transactions';
@@ -35,7 +39,9 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <RouterProvider router={router} />
+    <ApolloProvider client={client}>
+      <RouterProvider router={router} />
+    </ApolloProvider>
   );
 
 }
