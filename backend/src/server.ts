@@ -15,8 +15,27 @@ import rateLimiter from "@/common/middleware/rateLimiter";
 import requestLogger from "@/common/middleware/requestLogger";
 import { env } from "@/common/utils/envConfig";
 
+
+// ... tes autres imports
+// @ts-ignore: module resolution for 'ruru/server' doesn't match current tsconfig; add proper types or update moduleResolution later
+import { ruruHTML } from "ruru/server"; // Pour l'interface graphique
+import graphqlMiddleware from "./graphql/middleware"; // Notre serveur Apollo
+
 const logger = pino({ name: "server start" });
 const app: Express = express();
+
+// --- DÉBUT AJOUT GRAPHQL ---
+if (env.isDevelopment) {
+    const config = { endpoint: "/graphql" };
+
+    // 1. Route pour afficher l'interface Ruru (le "Swagger" de GraphQL)
+    app.get("/ruru", (req, res) => {
+        res.format({
+            html: () => res.status(200).send(ruruHTML(config)),
+            default: () => res.status(406).send("Not Acceptable"),
+        });
+    });
+}
 
 // Set the application to trust the reverse proxy
 app.set("trust proxy", true);
@@ -39,7 +58,8 @@ app.use("/api/expenses", expenseRouter);
 // AJOUTER CES LIGNES :
 app.use("/api/transfers", transferRouter);
 app.use("/api/transactions", transactionRouter);
-
+// graph ql 
+app.use("/graphql", graphqlMiddleware);
 // Error handlers
 app.use(errorHandler());
 
