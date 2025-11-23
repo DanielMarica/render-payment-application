@@ -6,7 +6,7 @@ const NavBar = () => {
             <div className="container mx-auto flex justify-center space-x-6">
                 <Link 
                     to="/" 
-                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                     Accueil
                 </Link>
@@ -22,6 +22,7 @@ const NavBar = () => {
                 >
                     Ajouter
                 </Link>
+                
             </div>
         </nav>
     );

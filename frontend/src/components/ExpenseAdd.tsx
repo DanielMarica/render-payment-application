@@ -48,48 +48,59 @@ const ExpenseAdd = ({ onAdd }: ExpenseAddProps) => {
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-8 space-y-6">
             {/* 
                 🔹 Payer Field (Select)
                 - register('payer') : lie ce champ au formulaire
                 - required : validation obligatoire
             */}
-            <label>
-                Payer:
-                <select {...register('payer')}>
+            <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-gray-700">
+                    Payer:
+                </label>
+                <select 
+                    {...register('payer')}
+                    className="border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-primary-500 focus:outline-none transition-colors"
+                >
                     <option value="Alice">Alice</option>
                     <option value="Bob">Bob</option>
                 </select>
-                {errors.payer && <span className="error">⚠️ {errors.payer.message}</span>}
-            </label>
+                {errors.payer && <span className="text-sm text-primary-600 font-medium">⚠️ {errors.payer.message}</span>}
+            </div>
 
             {/* 
                 🔹 Date Field
                 - required : validation obligatoire
             */}
-            <label>
-                Date:
+            <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-gray-700">
+                    Date:
+                </label>
                 <input 
                     type="date" 
-                    {...register('date')} 
+                    {...register('date')}
+                    className="border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-primary-500 focus:outline-none transition-colors"
                 />
-                {errors.date && <span className="error">⚠️ {errors.date.message}</span>}
-            </label>
+                {errors.date && <span className="text-sm text-primary-600 font-medium">⚠️ {errors.date.message}</span>}
+            </div>
 
             {/* 
                 🔹 Description Field
                 - required : validation obligatoire
                 - minLength : longueur minimale de 3 caractères
             */}
-            <label>
-                Description:
+            <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-gray-700">
+                    Description:
+                </label>
                 <input 
                     type="text" 
                     {...register('description')} 
                     placeholder="Enter description"
+                    className="border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-primary-500 focus:outline-none transition-colors"
                 />
-                {errors.description && <span className="error">⚠️ {errors.description.message}</span>}
-            </label>
+                {errors.description && <span className="text-sm text-primary-600 font-medium">⚠️ {errors.description.message}</span>}
+            </div>
 
             {/* 
                 🔹 Amount Field
@@ -97,18 +108,26 @@ const ExpenseAdd = ({ onAdd }: ExpenseAddProps) => {
                 - min : valeur minimale de 0.01
                 - valueAsNumber : convertit automatiquement la string en number
             */}
-            <label>
-                Amount:
+            <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-gray-700">
+                    Amount:
+                </label>
                 <input 
                     type="number" 
                     step="0.01"
                     {...register('amount', { valueAsNumber: true })} 
                     placeholder="Enter amount"
+                    className="border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-primary-500 focus:outline-none transition-colors"
                 />
-                {errors.amount && <span className="error">⚠️ {errors.amount.message}</span>}
-            </label>
+                {errors.amount && <span className="text-sm text-primary-600 font-medium">⚠️ {errors.amount.message}</span>}
+            </div>
 
-            <button type="submit">Add Expense</button>
+            <button 
+                type="submit"
+                className="w-full bg-secondary-500 hover:bg-secondary-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+            >
+                Add Expense
+            </button>
         </form>
     );
 };

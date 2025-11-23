@@ -1,5 +1,9 @@
 {
   "dependencies": {
     "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "prisma": "^6.19.0"
   }
 }

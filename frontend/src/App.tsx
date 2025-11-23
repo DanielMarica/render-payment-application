@@ -1,30 +1,43 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Layout from './components/Layout';
+import { createBrowserRouter, RouterProvider } from 'react-router';
+import Layout, { loader as layoutLoader } from './pages/Layout';
 import Welcome from './pages/Welcome';
-import List from './pages/List';
-import Add from './pages/Add';
-import './App.css';
+import Transactions, { loader as transactionsLoader } from './pages/Transactions';
+import ExpenseDetail, { loader as expenseDetailLoader } from './pages/ExpenseDetails';
+import NewTransfer, { loader as NewTransferLoader } from './pages/NewTransfer';
 
 const router = createBrowserRouter([
-  {
-    element: <Layout />,
-    children: [
-      {
-        index: true,
-        element: <Welcome />,
-      },
-      {
-        path: 'list',
-        element: <List />,
-      },
-      {
-        path: 'add',
-        element: <Add />,
-      },
-    ],
-  },
-]);
+    {
+      Component: Layout,
+      loader: layoutLoader,
+      id: "layout",
 
-export default function App() {
-  return <RouterProvider router={router} />;
+      children: [
+        { index: true, Component: Welcome },
+        {
+          path: 'transactions',
+          Component: Transactions,
+          loader: transactionsLoader,
+        },
+        {
+          path: 'expenses/:id',
+          Component: ExpenseDetail,
+          loader: expenseDetailLoader,
+        },
+        {
+          path: 'transfers/new',
+          Component: NewTransfer,
+          loader: NewTransferLoader,
+        }
+      ],
+    },
+  ]);
+
+
+function App() {
+  return (
+    <RouterProvider router={router} />
+  );
+
 }
+
+export default App;

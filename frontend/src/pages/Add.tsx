@@ -29,11 +29,11 @@ const Add = () => {
     };
 
     return (
-        <div>
-            <h2>Ajouter une Dépense</h2>
+        <div className="max-w-4xl mx-auto px-4 py-8">
+            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Ajouter une Dépense</h2>
             
             {error && (
-                <div style={{ color: "red", marginBottom: "1rem" }}>
+                <div className="bg-primary-50 border-2 border-primary-500 text-primary-700 rounded-lg p-4 mb-6 text-center font-medium">
                     Erreur : {error}
                 </div>
             )}
