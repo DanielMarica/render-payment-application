@@ -1,29 +1,47 @@
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";
+// On importe ton repository existant pour réutiliser la logique d'accès à la BDD
+import * as expenseRepository from "@/api/expense/expenseRepository";
 
-// 1. Le Schéma (Type Definitions)
-// C'est ici qu'on définit la forme des données (Le Menu)
+// 1. Le Schéma (La Carte du restaurant)
+// On définit à quoi ressemblent nos données pour le client
 const typeDefs = `#graphql
+  type User {
+    id: ID!
+    name: String!
+    email: String
+  }
+
+  type Expense {
+    id: ID!
+    description: String!
+    amount: Float!
+    date: String!
+    payer: User!
+    participants: [User!]!
+  }
+
   type Query {
-    hello: String
+    # On définit une requête qui demande un ID (Entier) et renvoie une Expense
+    expense(id: Int!): Expense
   }
 `;
 
-// 2. Les Resolvers
-// C'est ici qu'on définit comment récupérer les données (Le Cuisinier)
+// 2. Les Resolvers (Le Cuisinier)
+// On fait le lien entre la requête GraphQL et la fonction TypeScript
 const resolvers = {
   Query: {
-    hello: () => "Hello GraphQL!",
+    expense: async (_parent: any, args: { id: number }, _context: any) => {
+      // On appelle la méthode que tu as codée dans la leçon précédente !
+      return expenseRepository.getExpenseById(args.id);
+    },
   },
 };
 
-// 3. Initialisation du serveur
+// 3. Initialisation
 const server = new ApolloServer({ typeDefs, resolvers });
-
-// On démarre le serveur (nécessite top-level await)
 await server.start();
 
-// On crée le middleware pour Express
 const graphqlMiddleware = expressMiddleware(server);
 
 export default graphqlMiddleware;

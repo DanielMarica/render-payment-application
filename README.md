@@ -6,11 +6,12 @@ npx express-generator --no-view backend
 
 
 # technologie utilisé 
-typescript + React
-node.js
+typescript + React => frontend
+node.js + typescript(recent migration ) => backend
 primsa orm 
 React Hook 
 Zod 
+Graph Ql 
 # Leçon 2 : Avantages des technologies utilisées et descriptions
 
 ## 🔷 Prisma ORM - C'est quoi ?
