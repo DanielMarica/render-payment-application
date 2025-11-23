@@ -1,0 +1,1 @@
+ Cette structure (un dossier par page contenant Component, loader, index) est une pratique professionnelle courante appelée "Feature-based folder structure" (structure par fonctionnalité) ou "Module Pattern".
