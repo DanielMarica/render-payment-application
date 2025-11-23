@@ -19,8 +19,7 @@ import { env } from "@/common/utils/envConfig";
 // ... tes autres imports
 // @ts-ignore: module resolution for 'ruru/server' doesn't match current tsconfig; add proper types or update moduleResolution later
 import { ruruHTML } from "ruru/server"; // Pour l'interface graphique
-import graphqlMiddleware from "./graphql/middleware"; // Notre serveur Apollo
-
+import graphqlMiddleware from "./graphql/server";
 const logger = pino({ name: "server start" });
 const app: Express = express();
 
