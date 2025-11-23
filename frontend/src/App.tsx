@@ -8,6 +8,7 @@ import Welcome from './pages/Welcome';
 import Transactions, { loader as transactionsLoader } from './pages/Transactions';
 import ExpenseDetail, { loader as expenseDetailLoader } from './pages/ExpenseDetails';
 import NewTransfer, { loader as NewTransferLoader } from './pages/NewTransfer';
+import NewExpense, { loader as NewExpenseLoader } from './pages/NewExpense';
 
 const router = createBrowserRouter([
     {
@@ -31,7 +32,12 @@ const router = createBrowserRouter([
           path: 'transfers/new',
           Component: NewTransfer,
           loader: NewTransferLoader,
-        }
+        },
+        {
+        path: 'expenses/new', // Nouvelle route
+        Component: NewExpense,
+        loader: NewExpenseLoader,
+      }
       ],
     },
   ]);
