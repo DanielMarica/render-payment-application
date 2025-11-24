@@ -16,19 +16,32 @@ import NewExpense, { loader as NewExpenseLoader } from "./pages/NewExpense";
 import { Toaster } from 'sonner';
 import Login from "./pages/Login/Component";
 import ProtectedRoute from '@/components/ProtectedRoute';
+
 const router = createBrowserRouter([
+  // 1. Route Publique : Le Login (Accessible sans être connecté)
   {
-    Component: Layout,
-    loader: layoutLoader,
-    id: "layout",
-    children: [
-      { index: true, Component: Welcome },
-      {path: '/',
+    path: "/login",
+    Component: Login,
+  },
+  
+  // 2. Routes Protégées : Tout le reste de l'application
+  {
+    path: "/",
+    // C'est ICI qu'on applique la protection.
+    // Si pas connecté -> Redirection vers /login
+    // Si connecté -> Affiche le Layout
     element: (
       <ProtectedRoute>
         <Layout />
       </ProtectedRoute>
-    ),},
+    ),
+    loader: layoutLoader,
+    id: "layout",
+    children: [
+      { 
+        index: true, 
+        Component: Welcome 
+      },
       {
         path: "transactions",
         Component: Transactions,
@@ -45,14 +58,10 @@ const router = createBrowserRouter([
         loader: NewTransferLoader,
       },
       {
-        path: "expenses/new", // Nouvelle route
+        path: "expenses/new",
         Component: NewExpense,
         loader: NewExpenseLoader,
       },
-      {
-        path:"login",
-        Component : Login,
-      }
     ],
   },
 ]);
