@@ -1,0 +1,88 @@
+@hostname = http://localhost:3000
+
+### ------------------------------------------------------------------------
+### 1. TEST ERREUR 409 : CONFLICT
+### Tente de créer un utilisateur qui existe déjà.
+### ------------------------------------------------------------------------
+POST {{hostname}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Alice",
+  "email": "alice@expenso.dev",
+  "password": "password123"
+}
+
+# 👉 Résultat attendu :
+# Status: 409 Conflict (ou 400 selon ton controlleur REST)
+# JSON: { "error": "User with this email already exists" }
+
+
+### ------------------------------------------------------------------------
+### 2. TEST ERREUR 401 : UNAUTHENTICATED (Login échoué)
+### Tente de se connecter avec un mauvais mot de passe.
+### ------------------------------------------------------------------------
+POST {{hostname}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "alice@expenso.dev",
+  "password": "mauvaispassword"
+}
+
+# 👉 Résultat attendu :
+# Status: 401 Unauthorized
+# JSON: { "error": "Invalid email or password" }
+
+
+### ------------------------------------------------------------------------
+### 3. TEST ERREUR 401 : UNAUTHENTICATED (GraphQL sans Token)
+### Tente d'accéder à une donnée protégée sans le header Authorization.
+### ------------------------------------------------------------------------
+POST {{hostname}}/graphql
+Content-Type: application/json
+X-REQUEST-TYPE: GraphQL
+
+query {
+  expense(id: 12) {
+    description
+    amount
+  }
+}
+
+# 👉 Résultat attendu :
+# Status: 200 OK (GraphQL renvoie souvent 200 même en erreur)
+# JSON: "errors": [{ "message": "You must be logged in...", "extensions": { "code": "UNAUTHENTICATED", "statusCode": 401 } }]
+
+
+### ------------------------------------------------------------------------
+### 4. TEST ERREUR 404 : NOT FOUND
+### Tente de récupérer une dépense qui n'existe pas (avec un Token valide).
+### ------------------------------------------------------------------------
+
+# 1. D'abord, on se connecte pour avoir un token valide
+# @name login
+POST {{hostname}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "alice@expenso.dev",
+  "password": "password123"
+}
+
+###
+
+# 2. On utilise le token pour chercher l'ID 9999
+POST {{hostname}}/graphql
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+X-REQUEST-TYPE: GraphQL
+
+query {
+  expense(id: 9999) {
+    description
+  }
+}
+
+# 👉 Résultat attendu :
+# JSON: "errors": [{ "message": "Expense not found", "extensions": { "code": "NOT_FOUND", "statusCode": 404 } }]

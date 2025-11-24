@@ -2,8 +2,8 @@ import { useLoaderData, useNavigate, useNavigation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { gql } from '@apollo/client'; // Import nécessaire pour GraphQL
 import graphqlClient from '../../lib/graph-ql.client'; // Notre client Apollo
-import { useCurrentUser } from '../Layout';
 import type { User } from '../../types/User';
+import { useAuth } from '@/context/AuthContext';
 
 // Définition de la Mutation GraphQL
 // Note: On utilise String! pour la date pour correspondre à ton backend
@@ -25,10 +25,10 @@ interface ExpenseFormInputs {
 
 export default function NewExpense() {
     const { users } = useLoaderData() as { users: User[] };
-    const currentUser = useCurrentUser();
+    const { user } = useAuth(); // Move useAuth inside the component
     const navigate = useNavigate();
     const navigation = useNavigation();
-    
+    const { user: currentUser } = useAuth();
     const { register, handleSubmit, setError, formState: { errors } } = useForm<ExpenseFormInputs>();
     const isSubmitting = navigation.state === "submitting";
 
@@ -43,7 +43,7 @@ export default function NewExpense() {
                     description: data.description,
                     amount: Number(data.amount),
                     date: new Date(data.date).toISOString(), // Format ISO pour le backend
-                    payerId: Number(currentUser.id),
+                    payerId: user!.userId, // Use authenticated user's ID
                     // Conversion des IDs de string[] vers number[]
                     participantIds: data.participantIds.map(id => Number(id)),
                 },
@@ -58,7 +58,7 @@ export default function NewExpense() {
     };
 
     if (!currentUser) {
-        return <div className="p-4 text-yellow-700 bg-yellow-50 border-l-4 border-yellow-500">Please select a user in the navigation bar.</div>;
+        return <div className="p-4 text-yellow-700 bg-yellow-50 border-l-4 border-yellow-500">Please Login to continue</div>;
     }
 
     return (
@@ -71,7 +71,7 @@ export default function NewExpense() {
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Payer</label>
                     <div className="mt-1 p-2 bg-gray-100 border rounded text-gray-600">
-                        {currentUser.name}
+                        {currentUser.email}
                     </div>
                 </div>
 

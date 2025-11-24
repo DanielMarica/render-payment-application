@@ -5,7 +5,12 @@ import schema from "./schema";
 import type { GraphQLContext } from "../types/GraphQlContext"; // Adapte le chemin si besoin
 import { verifyToken } from "../api/auth/authService"; // Adapte le chemin si besoin
 
-const server = new ApolloServer({ schema });
+import { formatError } from "./errorFormatter";
+
+const server = new ApolloServer({ 
+  schema,
+  formatError, // <--- AJOUTER CETTE LIGNE
+});
 
 await server.start();
 

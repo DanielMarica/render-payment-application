@@ -1,23 +1,15 @@
-import { NavLink, Outlet, useLoaderData } from "react-router-dom";
-import { useState } from "react";
-import type { User } from "../../types/User";
-import type { LoaderData } from "./loader";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Layout() {
-  const data = useLoaderData() as LoaderData;
-  // SÉCURITÉ : Si le loader échoue ou renvoie null, on utilise un tableau vide
-  const users = data?.users || [];
+  // 1. On récupère l'état d'authentification réel
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
-  const [currentUser, setCurrentUser] = useState<null | User>(null);
-
-  const handleUserChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const id = Number(e.target.value);
-    const newCurrentUser = users.find((user) => user.id === id) ?? null;
-    setCurrentUser(newCurrentUser);
-  };
-
-  const outletContext = {
-    currentUser,
+  // 2. Fonction pour se déconnecter
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
   };
 
   return (
@@ -26,7 +18,9 @@ export default function Layout() {
         <div className="text-xl font-bold flex items-center gap-2">
           💸 Expenso
         </div>
+        
         <div className="flex items-center gap-4">
+          {/* --- LIENS DE NAVIGATION --- */}
           <NavLink
             to="/transactions"
             className={({ isActive }) =>
@@ -47,7 +41,6 @@ export default function Layout() {
           >
             New Transfer
           </NavLink>
-
           <NavLink
             to="/expenses/new"
             className={({ isActive }) =>
@@ -58,24 +51,38 @@ export default function Layout() {
           >
             New Expense
           </NavLink>
+
+          {/* --- ZONE AUTHENTIFICATION (Remplacement du Select) --- */}
           <div className="border-l border-teal-600 pl-4 ml-2">
-            <select
-              value={currentUser?.id ?? "none"}
-              className="bg-white text-black rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer"
-              onChange={handleUserChange}
-            >
-              <option value="none">— No User —</option>
-              {users.map((u: User) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
-              ))}
-            </select>
+            {isAuthenticated ? (
+              // CAS 1 : Utilisateur Connecté
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium bg-teal-900 px-3 py-1 rounded-full border border-teal-700">
+                  👤 {user?.email}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold px-3 py-1 rounded transition shadow-sm"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              // CAS 2 : Visiteur non connecté
+              <button
+                onClick={() => navigate("/login")}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold px-4 py-2 rounded transition shadow-md"
+              >
+                Login
+              </button>
+            )}
           </div>
         </div>
       </nav>
+
       <main className="max-w-5xl mx-auto p-6">
-        <Outlet context={outletContext} />
+        {/* On n'a plus besoin de passer de contexte ici, car AuthContext est global */}
+        <Outlet />
       </main>
     </div>
   );

@@ -43,8 +43,38 @@ app.set("trust proxy", true);
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
-app.use(helmet());
+
+
+// 2. Configuration CORS (Qui a le droit de nous appeler ?)
+app.use(cors({
+  // On utilise la variable d'environnement ou localhost par défaut
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true, // Autorise les cookies/sessions
+}));
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      // On autorise les scripts inline seulement en dev (nécessaire pour Ruru parfois)
+      scriptSrc: ["'self'", "'unsafe-inline'"], 
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false, // Utile pour le dev avec ressources externes
+  hsts: {
+    maxAge: 31536000, // 1 an : Force le navigateur à utiliser HTTPS
+    includeSubDomains: true,
+    preload: true,
+  },
+}));
+
 app.use(rateLimiter);
 
 // Request logging

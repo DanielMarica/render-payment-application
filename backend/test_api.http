@@ -1,0 +1,89 @@
+@hostname = http://localhost:3000
+
+### ------------------------------------------------------------------------
+### 1. INSCRIPTION (Register)
+### Crée un nouvel utilisateur. (Change l'email si tu relances le test)
+### ------------------------------------------------------------------------
+# @name register
+POST {{hostname}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test.user@expenso.dev",
+  "password": "password123"
+}
+
+### ------------------------------------------------------------------------
+### 2. CONNEXION (Login)
+### Récupère le Token JWT.
+### ------------------------------------------------------------------------
+# @name login
+POST {{hostname}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test.user@expenso.dev",
+  "password": "password123"
+}
+
+### ------------------------------------------------------------------------
+### 3. TEST SÉCURITÉ (GraphQL Sans Token)
+### Doit échouer avec une erreur 401 UNAUTHENTICATED
+### ------------------------------------------------------------------------
+POST {{hostname}}/graphql
+Content-Type: application/json
+X-REQUEST-TYPE: GraphQL
+
+query {
+  users {
+    name
+    email
+  }
+}
+
+### ------------------------------------------------------------------------
+### 4. TEST SUCCÈS (GraphQL Avec Token)
+### Utilise le token récupéré à l'étape 2 (variable {{login...}})
+### Doit retourner la liste des utilisateurs.
+### ------------------------------------------------------------------------
+POST {{hostname}}/graphql
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+X-REQUEST-TYPE: GraphQL
+
+query {
+  users {
+    id
+    name
+    email
+  }
+}
+
+### ------------------------------------------------------------------------
+### 5. CRÉATION DÉPENSE (Mutation Avec Token)
+### Crée une dépense au nom de l'utilisateur connecté.
+### Note : On utilise l'ID retourné par le login pour 'payerId'
+### ------------------------------------------------------------------------
+POST {{hostname}}/graphql
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+X-REQUEST-TYPE: GraphQL
+
+mutation CreateMyExpense($pid: Int!) {
+  createExpense(
+    description: "Test via HTTP File", 
+    amount: 50.0, 
+    date: "2025-12-25", 
+    payerId: $pid, 
+    participantIds: [$pid]
+  ) {
+    id
+    description
+    amount
+  }
+}
+
+{
+  "pid": {{login.response.body.user.id}}
+}
