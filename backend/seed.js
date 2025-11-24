@@ -1,26 +1,24 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt'; // Assure-toi d'avoir fait npm install bcrypt
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Démarrage du nettoyage de la base de données...');
-
-  // 1. On supprime d'abord les données dépendantes (Transfers, Expenses)
-  // pour éviter les erreurs de clés étrangères
+  console.log('🌱 Démarrage du nettoyage...');
   await prisma.transfer.deleteMany();
   await prisma.expense.deleteMany();
-  // On supprime les utilisateurs en dernier
   await prisma.user.deleteMany();
 
-  console.log('🧹 Base de données nettoyée.');
+  console.log('🌱 Création des utilisateurs avec mots de passe...');
 
-  console.log('🌱 Création des utilisateurs...');
+  // On crée un mot de passe hashé par défaut (ex: "password123")
+  const hashedPassword = await bcrypt.hash('password123', 10);
 
-  // 2. On crée les utilisateurs
   const alice = await prisma.user.create({
     data: {
       name: 'Alice',
       email: 'alice@expenso.dev',
+      password: hashedPassword, // <--- NOUVEAU
       bankAccount: 'US12 3456 7890',
     },
   });
@@ -29,6 +27,7 @@ async function main() {
     data: {
       name: 'Bob',
       email: 'bob@expenso.dev',
+      password: hashedPassword, // <--- NOUVEAU
       bankAccount: 'FR76 5432 1098',
     },
   });
@@ -37,31 +36,26 @@ async function main() {
     data: {
       name: 'Charlie',
       email: 'charlie@expenso.dev',
+      password: hashedPassword, // <--- NOUVEAU
     },
   });
 
-  console.log('✅ Utilisateurs créés avec succès :');
-  console.log(`👉 Alice   -> ID: ${alice.id}`);
-  console.log(`👉 Bob     -> ID: ${bob.id}`);
-  console.log(`👉 Charlie -> ID: ${charlie.id}`);
+  console.log('✅ Utilisateurs créés (Mot de passe par défaut: "password123")');
 
-  // 3. On crée une dépense initiale (Pizza Party payée par Alice)
+  // ... Le reste (Dépenses, Transferts) ne change pas ...
   const pizza = await prisma.expense.create({
     data: {
       description: 'Pizza Party',
       amount: 45.50,
       date: new Date(),
-      payerId: alice.id, // On utilise l'ID dynamique d'Alice
+      payerId: alice.id,
       participants: {
         connect: [{ id: alice.id }, { id: bob.id }, { id: charlie.id }],
       },
     },
   });
-
-  console.log(`✅ Dépense créée : Pizza Party (ID: ${pizza.id})`);
-
-  // 4. On crée un transfert initial (Bob rembourse Alice)
-  const transfer = await prisma.transfer.create({
+  
+  await prisma.transfer.create({
     data: {
       amount: 15.00,
       date: new Date(),
@@ -70,13 +64,12 @@ async function main() {
     },
   });
 
-  console.log(`✅ Transfert créé : Bob -> Alice (ID: ${transfer.id})`);
   console.log('🚀 Seed terminé !');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Erreur lors du seed :', e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {

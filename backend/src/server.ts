@@ -14,7 +14,7 @@ import errorHandler from "@/common/middleware/errorHandler";
 import rateLimiter from "@/common/middleware/rateLimiter";
 import requestLogger from "@/common/middleware/requestLogger";
 import { env } from "@/common/utils/envConfig";
-
+import authRouter from "@/api/auth/authRouter";
 
 // ... tes autres imports
 // @ts-ignore: module resolution for 'ruru/server' doesn't match current tsconfig; add proper types or update moduleResolution later
@@ -22,6 +22,7 @@ import { ruruHTML } from "ruru/server"; // Pour l'interface graphique
 import graphqlMiddleware from "./graphql/server";
 const logger = pino({ name: "server start" });
 const app: Express = express();
+
 
 // --- DÉBUT AJOUT GRAPHQL ---
 if (env.isDevelopment) {
@@ -57,6 +58,7 @@ app.use("/api/expenses", expenseRouter);
 // AJOUTER CES LIGNES :
 app.use("/api/transfers", transferRouter);
 app.use("/api/transactions", transactionRouter);
+app.use("/auth", authRouter);
 // graph ql 
 app.use("/graphql", graphqlMiddleware);
 // Error handlers

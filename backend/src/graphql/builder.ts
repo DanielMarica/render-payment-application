@@ -2,6 +2,7 @@ import SchemaBuilder from "@pothos/core";
 import PrismaPlugin from "@pothos/plugin-prisma";
 import type PrismaTypes from "../../prisma/pothos-types";
 import { PrismaClient } from "@prisma/client";
+import type { GraphQLContext } from "../types/GraphQlContext";
 
 const prisma = new PrismaClient();
 
@@ -13,14 +14,18 @@ const builder = new SchemaBuilder<{
       Output: Date;
     };
   };
+  Context: GraphQLContext;
 }>({
+  // 1. On retire RelayPlugin de la liste
   plugins: [PrismaPlugin],
+  
+  // 2. On retire relayOptions (ce qui causait ton erreur rouge)
+  
   prisma: {
     client: prisma,
   },
 });
 
-// On apprend à GraphQL ce qu'est une "Date" Javascript
 builder.scalarType("Date", {
   serialize: (date) => date.toISOString(),
   parseValue: (value) => {
@@ -28,7 +33,6 @@ builder.scalarType("Date", {
   },
 });
 
-// On initialise les types Query et Mutation ici pour pouvoir les étendre ailleurs
 builder.queryType({});
 builder.mutationType({});
 
