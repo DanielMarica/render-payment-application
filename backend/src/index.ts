@@ -1,19 +1,23 @@
 import { env } from "@/common/utils/envConfig";
-import { app, logger } from "@/server";
+// On importe httpServer au lieu de app pour le démarrage
+import { app, logger, httpServer } from "@/server"; 
 
-const server = app.listen(env.PORT, () => {
-	const { NODE_ENV, HOST, PORT } = env;
-	logger.info(`Server (${NODE_ENV}) running on port http://${HOST}:${PORT}`);
-});
-
+// Gestion des signaux d'arrêt
 const onCloseSignal = () => {
-	logger.info("sigint received, shutting down");
-	server.close(() => {
-		logger.info("server closed");
-		process.exit();
-	});
-	setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
+  logger.info("sigint received, shutting down");
+  // On ferme httpServer
+  httpServer.close(() => {
+    logger.info("server closed");
+    process.exit();
+  });
+  setTimeout(() => process.exit(1), 10000).unref();
 };
 
 process.on("SIGINT", onCloseSignal);
 process.on("SIGTERM", onCloseSignal);
+
+// DÉMARRAGE : On utilise httpServer.listen
+const server = httpServer.listen(env.PORT, () => {
+  const { NODE_ENV, HOST, PORT } = env;
+  logger.info(`Server (${NODE_ENV}) running on port http://${HOST}:${PORT}`);
+});

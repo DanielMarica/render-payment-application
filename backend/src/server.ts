@@ -2,33 +2,68 @@ import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
 import { pino } from "pino";
+import { createServer } from "http"; // <--- NOUVEAU
+import { Server as SocketServer } from "socket.io"; // <--- NOUVEAU
 
 import { healthCheckRouter } from "@/api/healthCheck/healthCheckRouter";
 import userRouter from "@/api/user/userRouter";
 import expenseRouter from "@/api/expense/expenseRouter";
-// AJOUTER CES IMPORTS :
 import transferRouter from "@/api/transfer/transferRouter";
 import transactionRouter from "@/api/transaction/trasnsactionRouter";
+import authRouter from "@/api/auth/authRouter"; // Si tu l'as
 
 import errorHandler from "@/common/middleware/errorHandler";
 import rateLimiter from "@/common/middleware/rateLimiter";
 import requestLogger from "@/common/middleware/requestLogger";
 import { env } from "@/common/utils/envConfig";
-import authRouter from "@/api/auth/authRouter";
 
-// ... tes autres imports
-// @ts-ignore: module resolution for 'ruru/server' doesn't match current tsconfig; add proper types or update moduleResolution later
-import { ruruHTML } from "ruru/server"; // Pour l'interface graphique
+// @ts-ignore
+import { ruruHTML } from "ruru/server";
 import graphqlMiddleware from "./graphql/server";
+import { serverAdapter } from './config/bullBoard';
+import path from 'path';
+
+// Imports Socket
+import { authenticateSocket, type AuthenticatedSocket } from "./socket/authMiddleware"; // <--- NOUVEAU
+
 const logger = pino({ name: "server start" });
 const app: Express = express();
 
+// --- CRÉATION SERVEUR HTTP (WRAPPER) ---
+const httpServer = createServer(app); // <--- NOUVEAU : On enveloppe Express
 
-// --- DÉBUT AJOUT GRAPHQL ---
+// --- CONFIG SOCKET.IO ---
+const io = new SocketServer(httpServer, { // <--- NOUVEAU
+  cors: {
+    //origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: "*", 
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+// --- MIDDLEWARES SOCKET ---
+io.use(authenticateSocket); // <--- NOUVEAU : On sécurise
+
+io.on("connection", (socket: AuthenticatedSocket) => {
+  const userId = socket.user?.userId;
+  console.log(`🔌 User ${userId} connected: ${socket.id}`);
+
+  // L'utilisateur rejoint sa "chambre" privée
+  if (userId) {
+    socket.join(`user-${userId}`);
+  }
+
+  socket.on("disconnect", (reason) => {
+    console.log(`🔌 User ${userId} disconnected: ${socket.id} (${reason})`);
+  });
+});
+
+// --- LE RESTE DU CODE EXPRESS (Inchangé) ---
+
+// Ruru
 if (env.isDevelopment) {
     const config = { endpoint: "/graphql" };
-
-    // 1. Route pour afficher l'interface Ruru (le "Swagger" de GraphQL)
     app.get("/ruru", (req, res) => {
         res.format({
             html: () => res.status(200).send(ruruHTML(config)),
@@ -37,61 +72,57 @@ if (env.isDevelopment) {
     });
 }
 
-// Set the application to trust the reverse proxy
-app.set("trust proxy", true);
+// Bull Board
+if (env.isDevelopment) {
+  app.use('/admin/queues', serverAdapter.getRouter());
+}
 
-// Middlewares
+// GraphQL
+app.use("/graphql", graphqlMiddleware);
+
+app.set("trust proxy", true);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-// 2. Configuration CORS (Qui a le droit de nous appeler ?)
+// Mise à jour CORS pour Express
 app.use(cors({
-  // On utilise la variable d'environnement ou localhost par défaut
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true, // Autorise les cookies/sessions
+  credentials: true,
 }));
 
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      // On autorise les scripts inline seulement en dev (nécessaire pour Ruru parfois)
       scriptSrc: ["'self'", "'unsafe-inline'"], 
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'"],
+      connectSrc: ["'self'", "ws:", "wss:"], // IMPORTANT: Autoriser WebSocket
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'none'"],
     },
   },
-  crossOriginEmbedderPolicy: false, // Utile pour le dev avec ressources externes
-  hsts: {
-    maxAge: 31536000, // 1 an : Force le navigateur à utiliser HTTPS
-    includeSubDomains: true,
-    preload: true,
-  },
+  crossOriginEmbedderPolicy: false,
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
 }));
 
 app.use(rateLimiter);
-
-// Request logging
 app.use(requestLogger);
 
-// Routes
+// Routes API
 app.use("/health-check", healthCheckRouter);
 app.use("/api/users", userRouter);
 app.use("/api/expenses", expenseRouter);
-
-// AJOUTER CES LIGNES :
 app.use("/api/transfers", transferRouter);
 app.use("/api/transactions", transactionRouter);
 app.use("/auth", authRouter);
-// graph ql 
-app.use("/graphql", graphqlMiddleware);
-// Error handlers
+
+// Fichiers statiques (PDF)
+app.use('/reports', express.static(path.join(process.cwd(), 'reports')));
+
 app.use(errorHandler());
 
-export { app, logger };
+// IMPORTANT : On exporte io et httpServer maintenant !
+export { app, logger, httpServer, io };

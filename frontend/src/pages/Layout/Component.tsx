@@ -18,7 +18,7 @@ export default function Layout() {
         <div className="text-xl font-bold flex items-center gap-2">
           💸 Expenso
         </div>
-        
+
         <div className="flex items-center gap-4">
           {/* --- LIENS DE NAVIGATION --- */}
           <NavLink
@@ -51,7 +51,17 @@ export default function Layout() {
           >
             New Expense
           </NavLink>
-
+       
+          <NavLink
+            to="/reports"
+            className={({ isActive }) =>
+              isActive
+                ? "text-yellow-300 font-bold border-b-2 border-yellow-300 ml-4"
+                : "hover:text-teal-200 transition ml-4"
+            }
+          >
+            PDF Reports
+          </NavLink>
           {/* --- ZONE AUTHENTIFICATION (Remplacement du Select) --- */}
           <div className="border-l border-teal-600 pl-4 ml-2">
             {isAuthenticated ? (

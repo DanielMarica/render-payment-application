@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router";
-
+import Reports  from "./pages/Reports";
 import { ApolloProvider } from "@apollo/client/react";
 import client from "./lib/graph-ql.client";
 import { AuthProvider } from "../src/context/AuthContext";
@@ -13,9 +13,9 @@ import ExpenseDetail, {
 } from "./pages/ExpenseDetails";
 import NewTransfer, { loader as NewTransferLoader } from "./pages/NewTransfer";
 import NewExpense, { loader as NewExpenseLoader } from "./pages/NewExpense";
-import { Toaster } from 'sonner';
+import { Toaster } from "sonner";
 import Login from "./pages/Login/Component";
-import ProtectedRoute from '@/components/ProtectedRoute';
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const router = createBrowserRouter([
   // 1. Route Publique : Le Login (Accessible sans être connecté)
@@ -23,7 +23,7 @@ const router = createBrowserRouter([
     path: "/login",
     Component: Login,
   },
-  
+
   // 2. Routes Protégées : Tout le reste de l'application
   {
     path: "/",
@@ -38,9 +38,9 @@ const router = createBrowserRouter([
     loader: layoutLoader,
     id: "layout",
     children: [
-      { 
-        index: true, 
-        Component: Welcome 
+      {
+        index: true,
+        Component: Welcome,
       },
       {
         path: "transactions",
@@ -61,6 +61,10 @@ const router = createBrowserRouter([
         path: "expenses/new",
         Component: NewExpense,
         loader: NewExpenseLoader,
+      },
+      {
+        path: "reports",
+        Component: Reports,
       },
     ],
   },
