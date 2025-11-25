@@ -1,11 +1,14 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-
+import { useSocket } from "../../context/SocketContext";
+import { useExpenseEvents } from "../../hooks/useExpenseEvents";
 export default function Layout() {
   // 1. On récupère l'état d'authentification réel
   const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  const { isConnected } = useSocket();
 
+  const navigate = useNavigate();
+  useExpenseEvents();
   // 2. Fonction pour se déconnecter
   const handleLogout = () => {
     logout();
@@ -51,7 +54,7 @@ export default function Layout() {
           >
             New Expense
           </NavLink>
-       
+
           <NavLink
             to="/reports"
             className={({ isActive }) =>
@@ -67,9 +70,22 @@ export default function Layout() {
             {isAuthenticated ? (
               // CAS 1 : Utilisateur Connecté
               <div className="flex items-center gap-3">
+                {/* INDICATEUR SOCKET */}
+                <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded text-xs">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      isConnected ? "bg-green-400 animate-pulse" : "bg-red-500"
+                    }`}
+                  />
+                  <span className="text-teal-100">
+                    {isConnected ? "Live" : "Offline"}
+                  </span>
+                </div>
+
                 <span className="text-sm font-medium bg-teal-900 px-3 py-1 rounded-full border border-teal-700">
                   👤 {user?.email}
                 </span>
+
                 <button
                   onClick={handleLogout}
                   className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold px-3 py-1 rounded transition shadow-sm"

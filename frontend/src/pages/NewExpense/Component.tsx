@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 // Définition de la Mutation GraphQL
 // Note: On utilise String! pour la date pour correspondre à ton backend
 const CREATE_EXPENSE_GQL = gql`
-  mutation CreateExpense($description: String!, $amount: Float!, $date: String!, $payerId: Int!, $participantIds: [Int!]!) {
+  mutation CreateExpense($description: String!, $amount: Float!, $date: Date!, $payerId: Int!, $participantIds: [Int!]!) {
     createExpense(description: $description, amount: $amount, date: $date, payerId: $payerId, participantIds: $participantIds) {
       id
       description

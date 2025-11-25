@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router";
 import Reports  from "./pages/Reports";
+import { SocketProvider } from '../src/context/SocketContext'; // <
 import { ApolloProvider } from "@apollo/client/react";
 import client from "./lib/graph-ql.client";
 import { AuthProvider } from "../src/context/AuthContext";
@@ -73,10 +74,12 @@ const router = createBrowserRouter([
 function App() {
   return (
     <AuthProvider>
+      <SocketProvider>
       <ApolloProvider client={client}>
         <RouterProvider router={router} />
         <Toaster position="top-right" richColors />
       </ApolloProvider>
+      </SocketProvider>
     </AuthProvider>
   );
 }
